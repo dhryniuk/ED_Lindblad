@@ -6,12 +6,12 @@ function one_body_Hamiltonian_term(params::parameters, op1::Matrix{ComplexF64}, 
     ops[1] = op1
 
     H::Matrix{ComplexF64} = zeros(ComplexF64, 2^params.N, 2^params.N)
-    for _ in 1:params.N-1
+    for _ in 1:params.N
         H += foldl(⊗, ops)
         ops = circshift(ops,1)
     end
 
-    return params.J*H
+    return params.h*H
 end
 
 function one_body_Hamiltonian_term(params::parameters, op1::SparseMatrixCSC{ComplexF64, Int64}, boundary_conditions)

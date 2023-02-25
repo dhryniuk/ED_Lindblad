@@ -24,7 +24,7 @@ function sparse_DQIM(params::parameters, boundary_conditions)
     return L_H + L_D
 end
 
-function LRInt_DQIM(params::parameters, boundary_conditions)
+function DQIM_LRI(params::parameters, boundary_conditions)
     """
     Returns the matrix Lindblad superoperator for the dissipative transverse field Ising model in 1D with long range coherent interactions
     """
@@ -37,7 +37,7 @@ function LRInt_DQIM(params::parameters, boundary_conditions)
     return L_H + L_D
 end
 
-function sparse_LRInt_DQIM(params::parameters, boundary_conditions)
+function sparse_DQIM_LRI(params::parameters, boundary_conditions)
     
     H_int = LR_two_body_Hamiltonian_term(params, sp_sz, sp_sz, boundary_conditions)
     H_X = one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
@@ -47,9 +47,9 @@ function sparse_LRInt_DQIM(params::parameters, boundary_conditions)
     return L_H + L_D
 end
 
-function LRDisp_DQIM(params::parameters, boundary_conditions)#, N_K)
+function DQIM_LRL(params::parameters, boundary_conditions)#, N_K)
     """
-    Returns the matrix Lindblad superoperator for the dissipative transverse field Ising model in 1D with long range dissipative interactions
+    Returns the matrix Lindblad superoperator for the dissipative transverse field Ising model in 1D with long range losses
     """
 
     H_ZZ= two_body_Hamiltonian_term(params, sz, sz, boundary_conditions)
@@ -60,7 +60,30 @@ function LRDisp_DQIM(params::parameters, boundary_conditions)#, N_K)
     return L_H + L_D
 end
 
-function sparse_LRDisp_DQIM(params::parameters, boundary_conditions)#, N_K)
+function sparse_DQIM_LRL(params::parameters, boundary_conditions)#, N_K)
+
+    H_ZZ= two_body_Hamiltonian_term(params, sp_sz, sp_sz, boundary_conditions)
+    H_X = one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
+    L_H = vectorize_Hamiltonian(params, H_ZZ + H_X)
+    L_D = LR_Lindbladian_term(params, sp_sm, sp_sp, boundary_conditions)
+
+    return L_H + L_D
+end
+
+function DQIM_LRD(params::parameters, boundary_conditions)#, N_K)
+    """
+    Returns the matrix Lindblad superoperator for the dissipative transverse field Ising model in 1D with long range dephasing
+    """
+
+    H_ZZ= two_body_Hamiltonian_term(params, sz, sz, boundary_conditions)
+    H_X = one_body_Hamiltonian_term(params, sx, boundary_conditions)
+    L_H = vectorize_Hamiltonian(params, H_ZZ + H_X)
+    L_D = LR_Lindbladian_term(params, sm, sp, boundary_conditions)
+
+    return L_H + L_D
+end
+
+function sparse_DQIM_LRD(params::parameters, boundary_conditions)#, N_K)
 
     H_ZZ= two_body_Hamiltonian_term(params, sp_sz, sp_sz, boundary_conditions)
     H_X = one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)

@@ -78,7 +78,7 @@ function DQIM_LRD(params::parameters, boundary_conditions)#, N_K)
     H_ZZ= two_body_Hamiltonian_term(params, sz, sz, boundary_conditions)
     H_X = one_body_Hamiltonian_term(params, sx, boundary_conditions)
     L_H = vectorize_Hamiltonian(params, H_ZZ + H_X)
-    L_D = LR_Lindbladian_term(params, sm, sp, boundary_conditions)
+    L_D = LR_Lindbladian_term(params, sz, sz, boundary_conditions)
 
     return L_H + L_D
 end
@@ -88,7 +88,7 @@ function sparse_DQIM_LRD(params::parameters, boundary_conditions)#, N_K)
     H_ZZ= two_body_Hamiltonian_term(params, sp_sz, sp_sz, boundary_conditions)
     H_X = one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
     L_H = vectorize_Hamiltonian(params, H_ZZ + H_X)
-    L_D = LR_Lindbladian_term(params, sp_sm, sp_sp, boundary_conditions)
+    L_D = LR_Lindbladian_term(params, sp_sz, sp_sz, boundary_conditions)
 
     return L_H + L_D
 end

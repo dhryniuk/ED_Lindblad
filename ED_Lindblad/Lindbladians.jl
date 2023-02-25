@@ -1,4 +1,4 @@
-export DQIM, sparse_DQIM, LRInt_DQIM, sparse_LRInt_DQIM, LRDisp_DQIM, sparse_LRDisp_DQIM
+export DQIM, sparse_DQIM, LRInt_DQIM, sparse_LRInt_DQIM, LRDisp_DQIM, sparse_LRDisp_DQIM, make_one_body_Lindbladian
 
 
 function DQIM(params::parameters, boundary_conditions)
@@ -67,5 +67,11 @@ function sparse_LRDisp_DQIM(params::parameters, boundary_conditions)#, N_K)
     L_H = vectorize_Hamiltonian(params, H_ZZ + H_X)
     L_D = LR_Lindbladian_term(params, sp_sm, sp_sp, boundary_conditions)
 
+    return L_H + L_D
+end
+
+function make_one_body_Lindbladian(H, Γ)
+    L_H = -1im*(H⊗id - id⊗transpose(H))
+    L_D = Γ⊗conj(Γ) - (conj(transpose(Γ))*Γ)⊗id/2 - id⊗(transpose(Γ)*conj(Γ))/2
     return L_H + L_D
 end

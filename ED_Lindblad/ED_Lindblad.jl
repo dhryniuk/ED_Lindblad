@@ -10,7 +10,7 @@ include("Lindbladians.jl")
 include("observables.jl")
 
 
-params = parameters(0,0,0,0,0,0)
+params = parameters(0,0,0,0,0,0,0,0)
 
 
 end

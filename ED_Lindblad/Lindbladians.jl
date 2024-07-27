@@ -28,6 +28,20 @@ function sparse_DQIM(params::parameters, boundary_conditions)
     return L_H + L_D
 end
 
+export sparse_DQIM_Cui
+
+function sparse_DQIM_Cui(params::parameters, boundary_conditions)
+
+    H_ZZ= params.J/4*two_body_Hamiltonian_term(params, sp_sz, sp_sz, boundary_conditions)
+    H_X = params.h/2*one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
+    H_Z = (params.hz-params.J/2)*one_body_Hamiltonian_term(params, sp_sz, boundary_conditions)
+    H_boundries = params.J/4*(single_one_body_Hamiltonian_term(1, params, sp_sz, boundary_conditions) + single_one_body_Hamiltonian_term(params.N, params, sp_sz, boundary_conditions))
+    L_H = vectorize_Hamiltonian(params, H_ZZ + H_X + H_Z + H_boundries)
+    L_D = params.γ_l*one_body_Lindbladian_term(sp_sm, params)
+
+    return L_H + L_D
+end
+
 function sparse_DQIM_Schulz(params::parameters, boundary_conditions)
 
     z=0.5*(sp_id+sp_sz)
@@ -85,6 +99,30 @@ function sparse_DQIM_LRI_Schulz(params::parameters, boundary_conditions)
     H_ZZ= params.J*LR_two_body_Hamiltonian_term(params, z, z, boundary_conditions)
     H_X = params.h*one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
     H_Z = params.hz*one_body_Hamiltonian_term(params, z, boundary_conditions)
+    L_H = vectorize_Hamiltonian(params, H_ZZ + H_X + H_Z)
+    L_D = params.γ_l*one_body_Lindbladian_term(sp_sm, params)
+
+    return L_H + L_D
+end
+
+export sparse_2D_DQIM, sparse_Frustrated_DQIM
+
+function sparse_2D_DQIM(params::parameters, boundary_conditions)
+
+    H_ZZ= params.J*Ising_term_square(params, boundary_conditions)
+    H_X = params.h*one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
+    H_Z = params.hz*one_body_Hamiltonian_term(params, sp_sz, boundary_conditions)
+    L_H = vectorize_Hamiltonian(params, H_ZZ + H_X + H_Z)
+    L_D = params.γ_l*one_body_Lindbladian_term(sp_sm, params)
+
+    return L_H + L_D
+end
+
+function sparse_Frustrated_DQIM(params::parameters, boundary_conditions)
+
+    H_ZZ= params.J*Ising_term_triangular(params, boundary_conditions)
+    H_X = params.h*one_body_Hamiltonian_term(params, sp_sx, boundary_conditions)
+    H_Z = params.hz*one_body_Hamiltonian_term(params, sp_sz, boundary_conditions)
     L_H = vectorize_Hamiltonian(params, H_ZZ + H_X + H_Z)
     L_D = params.γ_l*one_body_Lindbladian_term(sp_sm, params)
 

@@ -1,4 +1,4 @@
-export magnetization, purity, spin_spin_correlation, occupation, g2, sssf
+export magnetization, staggered_magnetization, squared_staggered_magnetization, squared_magnetization, purity, spin_spin_correlation, occupation, g2, sssf
 
 
 function magnetization(op,ρ,params)
@@ -13,6 +13,61 @@ function magnetization(op,ρ,params)
 
     return m/params.N
 end
+
+function staggered_magnetization(op, ρ, params)
+    first_term_ops = fill(id, params.N)
+    first_term_ops[1] = op
+    m::ComplexF64 = 0
+    for i in 1:params.N
+        m += (-1)^(i-1) * tr(ρ * foldl(⊗, first_term_ops))
+        first_term_ops = circshift(first_term_ops, 1)
+    end
+    return abs(m) / params.N
+end
+
+function squared_staggered_magnetization(op, ρ, params)
+    m::ComplexF64 = 0
+    ##CHECK i==j !!!
+    for i in 1:params.N
+        for j in 1:params.N
+            ops = fill(id, params.N)
+            ops[i] = op
+            ops[j] = op
+            if i==j
+                ops[i] = id
+            end
+            #println((-1)^(i+j) * tr(ρ * foldl(⊗, ops)))
+            m += (-1)^(i+j) * tr(ρ * foldl(⊗, ops))
+        end
+    end
+    #error()
+    return (m / (params.N^2))#^0.5
+end
+
+
+function squared_magnetization(op, ρ, params)
+    m::ComplexF64 = 0
+    for i in 1:params.N
+        for j in 1:params.N
+            ops = fill(id, params.N)
+            ops[i] = op
+            ops[j] = op
+            if i==j
+                ops[i] = id
+            end
+            m += tr(ρ * foldl(⊗, ops))
+        end
+    end
+    return (m / (params.N^2))#^0.5
+end
+
+function magnetization(op,site,ρ,params)
+    first_term_ops = fill(id, params.N)
+    first_term_ops[site] = op
+    m = tr(ρ*foldl(⊗, first_term_ops))
+    return m
+end
+
 
 function purity(ρ)
     return tr(ρ*adjoint(ρ))

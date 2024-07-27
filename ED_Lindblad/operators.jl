@@ -28,6 +28,12 @@ function one_body_Hamiltonian_term(params::parameters, op1::SparseMatrixCSC{Comp
     return H
 end
 
+function single_one_body_Hamiltonian_term(site, params::parameters, op1::SparseMatrixCSC{ComplexF64, Int64}, boundary_conditions)
+    ops = fill(sp_id, params.N)
+    ops[site] = op1
+    return foldl(⊗, ops)
+end
+
 function two_body_Hamiltonian_term(params::parameters, op1::Matrix{ComplexF64}, op2::Matrix{ComplexF64}, boundary_conditions)
     # vector of operators: [op1, op2, id, ...]
     ops = fill(id, params.N)
@@ -59,6 +65,144 @@ function two_body_Hamiltonian_term(params::parameters, op1::SparseMatrixCSC{Comp
     end
     if boundary_conditions=="periodic"
         H += foldl(⊗, ops)
+    end
+
+    return H
+end
+
+function Ising_term_square(params::parameters, boundary_conditions)
+    # Size of the 2D lattice
+    #Nx, Ny = params.Nx, params.Ny
+    #N = Nx * Ny
+    Nx = 3
+    Ny = 3
+    N=params.N
+
+    # Vector of operators: [op1, op2, id, ...]
+    ops = fill(sp_id, N)
+
+    H::SparseMatrixCSC{ComplexF64, Int64} = zeros(ComplexF64, 2^N, 2^N)
+
+    # Interaction terms along the x-direction
+    for iy in 0:Ny-1
+        for ix in 1:Nx-1
+            ops[ix + iy*Nx] = sp_sz
+            ops[ix+1 + iy*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix + iy*Nx] = sp_id
+            ops[ix+1 + iy*Nx] = sp_id
+        end
+    end
+
+    # Interaction terms along the y-direction
+    for iy in 0:Ny-2
+        for ix in 1:Nx
+            ops[ix + iy*Nx] = sp_sz
+            ops[ix + (iy+1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix + iy*Nx] = sp_id
+            ops[ix + (iy+1)*Nx] = sp_id
+        end
+    end
+
+    if boundary_conditions == "periodic"
+        # Periodic boundary conditions along the x-direction
+        for iy in 0:Ny-1
+            ops[1 + iy*Nx] = sp_sz
+            ops[Nx + iy*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[1 + iy*Nx] = sp_id
+            ops[Nx + iy*Nx] = sp_id
+        end
+
+        # Periodic boundary conditions along the y-direction
+        for ix in 1:Nx
+            ops[ix] = sp_sz
+            ops[ix + (Ny-1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix] = sp_id
+            ops[ix + (Ny-1)*Nx] = sp_id
+        end
+    end
+
+    return H
+end
+function Ising_term_triangular(params::parameters, boundary_conditions)
+    # Size of the triangular lattice
+    Nx = 3
+    Ny = 3
+    N = params.N
+
+    # Vector of operators: [op1, op2, id, ...]
+    ops = fill(sp_id, N)
+
+    H::SparseMatrixCSC{ComplexF64, Int64} = zeros(ComplexF64, 2^N, 2^N)
+
+    # Interaction terms along the x-direction
+    for iy in 0:Ny-1
+        for ix in 1:Nx-1
+            ops[ix + iy*Nx] = sp_sz
+            ops[ix+1 + iy*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix + iy*Nx] = sp_id
+            ops[ix+1 + iy*Nx] = sp_id
+        end
+    end
+
+    # Interaction terms along the y-direction
+    for iy in 0:Ny-2
+        for ix in 1:Nx
+            ops[ix + iy*Nx] = sp_sz
+            ops[ix + (iy+1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix + iy*Nx] = sp_id
+            ops[ix + (iy+1)*Nx] = sp_id
+        end
+    end
+
+    # Interaction terms along the diagonal direction
+    for iy in 0:Ny-2
+        for ix in 1:Nx-1
+            ops[ix + iy*Nx] = sp_sz
+            ops[ix+1 + (iy+1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix + iy*Nx] = sp_id
+            ops[ix+1 + (iy+1)*Nx] = sp_id
+        end
+    end
+
+    if boundary_conditions == "periodic"
+        # Periodic boundary conditions along the x-direction
+        for iy in 0:Ny-1
+            ops[1 + iy*Nx] = sp_sz
+            ops[Nx + iy*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[1 + iy*Nx] = sp_id
+            ops[Nx + iy*Nx] = sp_id
+        end
+
+        # Periodic boundary conditions along the y-direction
+        for ix in 1:Nx
+            ops[ix] = sp_sz
+            ops[ix + (Ny-1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix] = sp_id
+            ops[ix + (Ny-1)*Nx] = sp_id
+        end
+
+        # Periodic boundary conditions along the diagonal direction
+        for ix in 1:Nx-1
+            ops[ix] = sp_sz
+            ops[ix+1 + (Ny-1)*Nx] = sp_sz
+            H += foldl(⊗, ops)
+            ops[ix] = sp_id
+            ops[ix+1 + (Ny-1)*Nx] = sp_id
+        end
+        ops[1] = sp_sz
+        ops[N] = sp_sz
+        H += foldl(⊗, ops)
+        ops[1] = sp_id
+        ops[N] = sp_id
     end
 
     return H

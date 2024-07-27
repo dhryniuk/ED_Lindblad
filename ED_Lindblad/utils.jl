@@ -4,14 +4,14 @@ export id, sx, sy, sz, sp, sm
 
 
 function eigen_sparse(x)
-    decomp, history = partialschur(x, nev=1, which=LR(); restarts=100000); # only solve for the ground state
+    decomp, history = partialschur(x, nev=1, which=:LR, restarts=100000); # only solve for the ground state
     vals, vecs = partialeigen(decomp);
     return vals, vecs
 end
 
 export eigen_sparse2
 function eigen_sparse2(x)
-    decomp, history = partialschur(x, nev=2, which=LR(); restarts=100000); # only solve for the ground state
+    decomp, history = partialschur(x, nev=2, which=:LR, restarts=100000); # only solve for the ground state
     vals, vecs = partialeigen(decomp);
     return vals, vecs
 end
